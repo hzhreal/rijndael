@@ -1,0 +1,5 @@
+lib
+obj
+.cache
+test/test
+test/test.o
