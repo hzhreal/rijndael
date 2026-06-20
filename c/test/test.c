@@ -34,6 +34,15 @@ static const uint8_t DATA_1_CBC_DEC[sizeof(DATA_1)] = {
 	0xBB, 0x72, 0x9F, 0xFA, 0x32, 0x5F, 0x21, 0x0B, 0x97, 0x57, 0x91, 0xA0, 0x4D, 0xC9, 0x27, 0x5B,
 	0x4B, 0x53, 0x75, 0x69, 0x89, 0x7E, 0x56, 0x5D, 0x21, 0x74, 0x23, 0xD2, 0x70, 0xDF, 0x2F, 0xF8
 };
+static const uint8_t DATA_1_CTR_ENC[sizeof(DATA_1)] = {
+	0x87, 0x17, 0x27, 0x66, 0x2E, 0x4C, 0xB4, 0x82, 0xFB, 0x6B, 0x62, 0x17, 0x03, 0x0D, 0xF1, 0x8C,
+	0xD8, 0xFF, 0x1A, 0xF6, 0xAF, 0x7E, 0x29, 0x70, 0xF0, 0xDB, 0xFF, 0x8E, 0x7A, 0xF1, 0xCD, 0xF4
+};
+static const uint8_t DATA_1_CTR_DEC[sizeof(DATA_1)] = {
+	0x87, 0x17, 0x27, 0x66, 0x2E, 0x4C, 0xB4, 0x82, 0xFB, 0x6B, 0x62, 0x17, 0x03, 0x0D, 0xF1, 0x8C,
+	0xD8, 0xFF, 0x1A, 0xF6, 0xAF, 0x7E, 0x29, 0x70, 0xF0, 0xDB, 0xFF, 0x8E, 0x7A, 0xF1, 0xCD, 0xF4
+};
+
 
 int
 main(void)
@@ -41,6 +50,7 @@ main(void)
 	Rijndael_Ctx r = {0};
 	Rijndael_ECB_Ctx ecb = {0};
 	Rijndael_CBC_Ctx cbc = {0};
+	Rijndael_CTR_Ctx ctr = {0};
 	uint8_t d[sizeof(DATA_1)] = {0};
 	int ret;
 
@@ -55,6 +65,11 @@ main(void)
 		printf("rijndael_set_mode_CBC fail: %d\n", ret);
 		return 1;
 	}
+	ret = rijndael_set_mode_CTR(&ctr, &r, IV_1, 8, IV_1 + 8, 8);
+	if (ret < 0) {
+		printf("rijndael_set_mode_CTR fail: %d\n", ret);
+		return 1;
+	}
 
 	ret = rijndael_encrypt_ECB(&ecb, DATA_1, sizeof(DATA_1), d, sizeof(d));
 	if (ret < 0) {
@@ -66,6 +81,10 @@ main(void)
 		return 1;
 	}
 	ret = rijndael_decrypt_ECB(&ecb, DATA_1, sizeof(DATA_1), d, sizeof(d));
+	if (ret < 0) {
+		printf("rijndael_decrypt_ECB fail: %d\n", ret);
+		return 1;
+	}
 	if (memcmp(DATA_1_ECB_DEC, d, sizeof(d)) != 0) {
 		printf("DATA_1_ECB_DEC mismatch\n");
 		return 1;
@@ -81,8 +100,31 @@ main(void)
 		return 1;
 	}
 	ret = rijndael_decrypt_CBC(&cbc, DATA_1, sizeof(DATA_1), d, sizeof(d));
+	if (ret < 0) {
+		printf("rijndael_decrypt_CBC fail: %d\n", ret);
+		return 1;
+	}
 	if (memcmp(DATA_1_CBC_DEC, d, sizeof(d)) != 0) {
 		printf("DATA_1_CBC_DEC mismatch\n");
+		return 1;
+	}
+
+	ret = rijndael_encrypt_CTR(&ctr, DATA_1, sizeof(DATA_1), d, sizeof(d));
+	if (ret < 0) {
+		printf("rijndael_encrypt_CTR fail: %d\n", ret);
+		return 1;
+	}
+	if (memcmp(DATA_1_CTR_ENC, d, sizeof(d)) != 0) {
+		printf("DATA_1_CTR_ENC mismatch\n");
+		return 1;
+	}
+	ret = rijndael_decrypt_CTR(&ctr, DATA_1, sizeof(DATA_1), d, sizeof(d));
+	if (ret < 0) {
+		printf("rijndael_decrypt_CTR fail: %d\n", ret);
+		return 1;
+	}
+	if (memcmp(DATA_1_CTR_DEC, d, sizeof(d)) != 0) {
+		printf("DATA_1_CTR_DEC mismatch\n");
 		return 1;
 	}
 
@@ -102,3 +144,4 @@ main(void)
 
 	return 0;
 }
+

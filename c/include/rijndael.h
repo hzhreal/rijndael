@@ -67,23 +67,62 @@ typedef struct
 }
 Rijndael_CBC_Ctx;
 
+typedef struct
+{
+	uint8_t obj_e[32];
+	uint8_t obj_d[32];
+
+	uint8_t ks[32];
+	uint8_t ks_i;
+
+	uint8_t ctr_start;
+	uint8_t ctr_end;
+
+	const Rijndael_Ctx *R;
+}
+Rijndael_CTR_Ctx;
+
 int
-rijndael_init(Rijndael_Ctx *ctx, const uint8_t *key, uint8_t key_len, uint8_t block_len);
+rijndael_init(Rijndael_Ctx *ctx,
+			  const uint8_t *key, uint8_t key_len,
+			  uint8_t block_len);
 
 void
 rijndael_set_mode_ECB(Rijndael_ECB_Ctx *ecb_ctx, const Rijndael_Ctx *ctx);
 int
-rijndael_set_mode_CBC(Rijndael_CBC_Ctx *cbc_ctx, const Rijndael_Ctx *ctx, const uint8_t *iv, size_t iv_len);
+rijndael_set_mode_CBC(Rijndael_CBC_Ctx *cbc_ctx, const Rijndael_Ctx *ctx,
+					  const uint8_t *iv, size_t iv_len);
+int
+rijndael_set_mode_CTR(Rijndael_CTR_Ctx *ctr_ctx, const Rijndael_Ctx *ctx,
+					  const uint8_t *nonce, size_t nonce_len,
+					  const uint8_t *initial_value, size_t initial_value_len);
 
 int
-rijndael_encrypt_ECB(const Rijndael_ECB_Ctx *ctx, const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+rijndael_encrypt_ECB(const Rijndael_ECB_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
 int
-rijndael_encrypt_CBC(Rijndael_CBC_Ctx *ctx, const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+rijndael_encrypt_CBC(Rijndael_CBC_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
+int
+rijndael_encrypt_CTR(Rijndael_CTR_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
 
 int
-rijndael_decrypt_ECB(const Rijndael_ECB_Ctx *ctx, const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+rijndael_decrypt_ECB(const Rijndael_ECB_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
 int
-rijndael_decrypt_CBC(Rijndael_CBC_Ctx *ctx, const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
+rijndael_decrypt_CBC(Rijndael_CBC_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
+int
+rijndael_decrypt_CTR(Rijndael_CTR_Ctx *ctx,
+					 const uint8_t *in, size_t in_len,
+					 uint8_t *out, size_t out_len);
+
 
 #endif // RIJNDAEL_H
 
