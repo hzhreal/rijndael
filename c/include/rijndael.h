@@ -72,8 +72,10 @@ typedef struct
 	uint8_t obj_e[32];
 	uint8_t obj_d[32];
 
-	uint8_t ks[32];
-	uint8_t ks_i;
+	uint8_t ks_e[32];
+	uint8_t ks_d[32];
+	uint8_t ks_i_e;
+	uint8_t ks_i_d;
 
 	uint8_t ctr_start;
 	uint8_t ctr_end;

@@ -330,7 +330,8 @@ rijndael_set_mode_CTR(Rijndael_CTR_Ctx *ctr_ctx, const Rijndael_Ctx *ctx,
 		ctr_ctx->ctr_start = 0;
 	ctr_ctx->ctr_end = ctr_ctx->ctr_start + initial_value_len;
 
-	ctr_ctx->ks_i = block_len;
+	ctr_ctx->ks_i_e = block_len;
+	ctr_ctx->ks_i_d = block_len;
 
 	if (nonce != NULL) {
 		memcpy(ctr_ctx->obj_e, nonce, nonce_len);
@@ -404,20 +405,20 @@ rijndael_encrypt_CTR(Rijndael_CTR_Ctx *ctx,
 
 	size_t i = 0;
 	while (i < out_len) {
-		if (ctx->ks_i != block_len) {
-			out[i] = in[i] ^ ctx->ks[ctx->ks_i];
-			ctx->ks_i++;
+		if (ctx->ks_i_e != block_len) {
+			out[i] = in[i] ^ ctx->ks_e[ctx->ks_i_e];
+			ctx->ks_i_e++;
 			i++;
 			continue;
 		}
 
-		cipher(ctx->R, ctx->obj_e, ctx->ks);
+		cipher(ctx->R, ctx->obj_e, ctx->ks_e);
 		for (int j = ctx->ctr_end; j >= ctx->ctr_start; j--) {
 			ctx->obj_e[j]++;
 			if (ctx->obj_e[j] != 0)
 				break;
 		}
-		ctx->ks_i = 0;
+		ctx->ks_i_e = 0;
 	}
 
 	return 0;
@@ -463,7 +464,7 @@ rijndael_decrypt_CBC(Rijndael_CBC_Ctx *ctx,
 	for (size_t i = 0; i < in_len; i += block_len) {
 		memcpy(C_i, in + i, block_len);
 		invcipher(ctx->R, in + i, out + i);
-		for (uint8_t j = 0; j < block_len; j++)
+		for (int j = 0; j < block_len; j++)
 			out[i + j] ^= ctx->C_i_d[j];
 		memcpy(ctx->C_i_d, C_i, block_len);
 	}
@@ -486,20 +487,20 @@ rijndael_decrypt_CTR(Rijndael_CTR_Ctx *ctx,
 
 	size_t i = 0;
 	while (i < out_len) {
-		if (ctx->ks_i != block_len) {
-			out[i] = in[i] ^ ctx->ks[ctx->ks_i];
-			ctx->ks_i++;
+		if (ctx->ks_i_d != block_len) {
+			out[i] = in[i] ^ ctx->ks_d[ctx->ks_i_d];
+			ctx->ks_i_d++;
 			i++;
 			continue;
 		}
 
-		cipher(ctx->R, ctx->obj_d, ctx->ks);
+		cipher(ctx->R, ctx->obj_d, ctx->ks_d);
 		for (int j = ctx->ctr_end; j >= ctx->ctr_start; j--) {
 			ctx->obj_d[j]++;
 			if (ctx->obj_d[j] != 0)
 				break;
 		}
-		ctx->ks_i = 0;
+		ctx->ks_i_d = 0;
 	}
 
 	return 0;
