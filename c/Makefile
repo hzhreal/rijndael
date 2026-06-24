@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -Iinclude -std=c23
 ifdef DEBUG
 	CFLAGS += -g
 else
-	CFLAGS += -DNDEBUG
+	CFLAGS += -DNDEBUG -O3
 endif
 
 # Source directory
