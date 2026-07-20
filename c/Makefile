@@ -46,7 +46,7 @@ $(TEST_EXEC): $(TEST_OBJ) $(TARGET)
 
 .DEFAULT_GOAL = build
 
-.PHONY: all build test install clean uninstall
+.PHONY: all build test install clangd clean uninstall
 
 all: build test
 
@@ -59,6 +59,11 @@ install: $(TARGET)
 	for header in $(HDRS); do \
 		sudo cp $$header /usr/local/include/; \
 	done
+
+clangd: clean
+	bear -- make all
+	@mkdir -p build
+	mv compile_commands.json build/compile_commands.json
 
 clean:
 	rm -rf $(OBJ_DIR) $(LIB_DIR) $(TEST_OBJ) $(TEST_EXEC)
