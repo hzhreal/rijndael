@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/random.h>
+#include <sys/types.h>
 
 #include "../include/rijndael.h"
 
@@ -198,12 +201,33 @@ test_a(void)
 	return 0;
 }
 
+static int
+test_c(void)
+{
+	ssize_t l = 1 << 30;
+	uint8_t *d = malloc(l);
+	if (getrandom(d, l, 0) != l) {
+		printf("getrandom fail!\n");
+		return 1;
+	}
+
+	Rijndael_Ctx r = {};
+	Rijndael_CBC_Ctx cbc = {};
+	rijndael_init(&r, d, 32, 32);
+	rijndael_set_mode_CBC(&cbc, &r, d, 32);
+	rijndael_encrypt_CBC(&cbc, d, l, d, l);
+
+	return 0;
+}
+
 int
 main(void)
 {
 	if (test_a() != 0)
 		return 1;
 	if (test_b() != 0)
+		return 1;
+	if (test_c() != 0)
 		return 1;
 	return 0;
 }
